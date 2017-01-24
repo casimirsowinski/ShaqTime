@@ -16,6 +16,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ShaqTime.ino" />
+    <None Include="Working_Button_And_ST_Seq.ino" />
+    <None Include="replacing rgb_color struct init.ino" />
+    <None Include="test.ino" />
   </ItemGroup>
- 
+  <ItemGroup>
+    <ClInclude Include="__vm\.ShaqTime.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
