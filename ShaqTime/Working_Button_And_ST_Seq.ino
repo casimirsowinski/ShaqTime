@@ -74,12 +74,23 @@ float delta_theta_g = 0.11;
 float delta_theta_b = 0.07;
 float const MAX_THETA = 6.2831;
 
-
-rgb_color offColor[LED_COUNT];
+rgb_color colorOFF[LED_COUNT];
+rgb_color colorST[LED_COUNT];
+rgb_color colorSR[LED_COUNT];
 
 int offnum = 0;
 
 unsigned int overCurrentTic = 0;
+
+unsigned int colIdx = 0;
+float colVel = 1.0;
+float colAcc = 0.11;
+unsigned int colState = 2;
+float theta_col = 0;
+float delta_theta_col = 5;
+
+int col_strobe_max = 2;
+int col_strobe = col_strobe_max;
 
 // enumerate the possible patterns in the order they will cycle
 enum Pattern {
@@ -111,6 +122,7 @@ void setup()
 		// generation the next time the program runs
 		EEPROM.write(0, random(256));
 
+
 		// optionally connect a switch between this pin and ground
 		// when the input is low, freeze the cycle at the current pattern
 		pinMode(AUTOCYCLE_SWITCH_PIN, INPUT_PULLUP);
@@ -130,7 +142,7 @@ void setup()
 
 		// Populate colors GET RID OF THIS IF DYNAMIC COLORS NOT NEEDED
 		for (size_t i = 0; i < LED_COUNT; i++) {
-				offColor[i] = { 0, 0, 0 };
+				colorOFF[i] = { 0, 0, 0 };
 		}
 }
 
@@ -198,12 +210,115 @@ void loop()
 				} 
 				// Run Shaq Time
 				if (shaqTime == 1) {
-						for (int i = 0; i < LED_COUNT; i++) {
-								colors[i] = rgb_color{ 0, 100, 0 };
+						//for (int i = 0; i < LED_COUNT; i++) {
+						//		colors[i] = rgb_color{ 0, 100, 0 };
+						//}
+
+						///*Collision*/
+						//int skip = 1;
+						//for (size_t i = 0; i < LED_COUNT; i = i + skip) {
+						//		/*Scale LED_COUNT to 256*/
+						//		int r = i * 0.85;
+						//		colorST[i] = rgb_color{ r, r, 20 };
+						//		int skipNum = skip - 1;
+						//		while (skipNum > 1) {
+						//				colorST[i - skipNum] = rgb_color{ r, r, 20 };
+						//		}
+						//		/*Randomly accerate trail*/
+						//		if (!random(5)) {
+						//				//skip++;
+						//		}
+						//}
+						if (colState == 0) {
+								/*Store last updated LED*/
+								unsigned int lastIdx = colIdx;
+								/*Apply velocity and acceleration*/
+								colIdx = (int)(colIdx + colVel);
+								colVel += colAcc;
+								/*Set current LED to some color*/
+								colorST[colIdx] = rgb_color{ colIdx * 0.45, colIdx * 0.24 + random(100), colIdx * 0.4 };
+								/*Fill in between this LED and last LED*/
+								for (size_t i = lastIdx + 1; i < colIdx; i++) {
+										colorST[i] = rgb_color{ 70, 10, 11 };
+								}
+								/*Fade all LEDs*/
+								for (size_t i = 0; i < LED_COUNT; i++) {
+										colorST[i].red *= 0.9;
+										colorST[i].green *= 0.9;
+										colorST[i].blue *= 0.9;
+								}
+								/*Reset, change state*/
+								if (colIdx > LED_COUNT - 1) {
+										colIdx = LED_COUNT - 2;
+										colVel = 1;
+										colState = 1;
+								}
+						}
+						if (colState == 2) {
+
+								for (size_t i = 0; i < LED_COUNT; i++) {
+										
+										if (col_strobe == 0) {
+												for (size_t i = 0; i < LED_COUNT; i++) {
+														colorST[i] = rgb_color{ 120, 120, 120 };
+												}
+												col_strobe = col_strobe_max;
+										} 
+										else {
+												for (size_t i = 0; i < LED_COUNT; i++) {
+														colorST[i] = rgb_color{ 0, 0, 0 };
+												}
+												col_strobe--;
+										}							
+
+
+										//theta_col = theta_col + delta_theta_col;
+
+										////iv effect
+										//if (theta_col > MAX_THETA) {
+										//		theta_col = 0;
+										//}
+
+										//for (size_t i = 0; i < LED_COUNT; i++) {
+										//		colorST[i] = rgb_color{ 20 + 20 * sin(theta_col), 20 + 20 * sin(theta_col), 20 + 20 * sin(theta_col) };
+										//}
+
+								}
+						}
+						else {
+								/*Store last updated LED*/
+								unsigned int lastIdx = colIdx;
+								/*Apply velocity and acceleration*/
+								colIdx = (int)(colIdx - colVel);
+								colVel += colAcc;
+								/*Set current LED to some color*/
+								colorST[colIdx] = rgb_color{ colIdx * 0.45, colIdx * 0.24 + random(100), colIdx * 0.4 };
+								/*Fill in between this LED and last LED*/
+								for (size_t i = lastIdx + 1; i < colIdx; i++) {
+										colorST[i] = rgb_color{ 70, 10, 11 };
+								}
+								/*Fade all LEDs*/
+								for (size_t i = 0; i < LED_COUNT; i++) {
+										colorST[i].red *= 0.9;
+										colorST[i].green *= 0.9;
+										colorST[i].blue *= 0.9;
+								}
+								/*Reset, change state*/
+								if (colIdx == 0) {
+										colIdx = 0;
+										colVel = 1;
+										colState = 0;
+								}
 						}
 
+						
+
+
+
+
+
 						// Write out colors
-						ledStrip.write(colors, LED_COUNT);
+						ledStrip.write(colorST, LED_COUNT);
 						////handleNextPatternButton();
 
 						//if (loopCount == 0)
@@ -326,7 +441,15 @@ void loop()
 				shaqTime = 0;
 
 				if (offnum == 0) {
-						offColor[random(LED_COUNT - 1)] = rgb_color{ random(255), random(255), random(255) };
+						/*Pick random LED not near edges*/
+						int randCenter = random(LED_COUNT - 8) + 4;
+						int randSpread = random(3);
+						colorOFF[randCenter] = rgb_color{ random(255), random(255), random(255) };
+						while (randSpread > 0) {
+								colorOFF[randCenter - randSpread] = colorOFF[randCenter];
+								colorOFF[randCenter + randSpread] = colorOFF[randCenter];
+								randSpread--;
+						}
 				}
 				offnum++;
 				if (offnum > 1)
@@ -340,7 +463,7 @@ void loop()
 				//		overCurrentTic = 0;
 				//		/*Check "current"*/
 				//		for (size_t i = 0; i < LED_COUNT; i++) {
-				//				ledSum += offColor[i].red + offColor[i].green + offColor[i].blue;
+				//				ledSum += colorOFF[i].red + colorOFF[i].green + colorOFF[i].blue;
 				//		}
 				//		if (ledSum > 700 * LED_COUNT) {
 				//				currentMult = 1;
@@ -352,15 +475,15 @@ void loop()
 				
 				// Propagate colors in both directions
 				for (int i = 1; i < LED_COUNT; i++) {
-						//offColor[i].red = currentMult * mult * (offColor[i].red + offColor[i - 1].red + offColor[i + 1].red);
-						offColor[i].red = mult * (offColor[i].red + offColor[i - 1].red + offColor[i + 1].red);
-						offColor[i].green = 0.8 * mult * (offColor[i].red + offColor[i - 1].green + offColor[i + 1].green);
-						offColor[i].blue = 0.5 * mult * (offColor[i].green + offColor[i - 1].blue + offColor[i + 1].blue);
-						//offColor[i] = offColor[i - 1];
+						//colorOFF[i].red = currentMult * mult * (colorOFF[i].red + colorOFF[i - 1].red + colorOFF[i + 1].red);
+						colorOFF[i].red = mult * (colorOFF[i].red + colorOFF[i - 1].red + colorOFF[i + 1].red);
+						colorOFF[i].green = 0.8 * mult * (colorOFF[i].red + colorOFF[i - 1].green + colorOFF[i + 1].green);
+						colorOFF[i].blue = 0.5 * mult * (colorOFF[i].green + colorOFF[i - 1].blue + colorOFF[i + 1].blue);
+						//colorOFF[i] = colorOFF[i - 1];
 				}
 
-				ledStrip.write(offColor, LED_COUNT);
-				//ledStrip.write(offColor, LED_COUNT);	
+				ledStrip.write(colorOFF, LED_COUNT);
+				//ledStrip.write(colorOFF, LED_COUNT);	
 		}
 }
 
