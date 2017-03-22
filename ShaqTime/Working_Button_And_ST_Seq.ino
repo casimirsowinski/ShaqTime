@@ -253,7 +253,7 @@ void loop()
 										colVel = 1;
 										colState = 1;
 								}
-						}
+						}//end if (colState == 0) 
 						if (colState == 2) {
 
 								for (size_t i = 0; i < LED_COUNT; i++) {
@@ -269,8 +269,7 @@ void loop()
 														colorST[i] = rgb_color{ 0, 0, 0 };
 												}
 												col_strobe--;
-										}							
-
+										}					
 
 										//theta_col = theta_col + delta_theta_col;
 
@@ -284,7 +283,7 @@ void loop()
 										//}
 
 								}
-						}
+						}//end if (colState == 2)
 						else {
 								/*Store last updated LED*/
 								unsigned int lastIdx = colIdx;
@@ -309,133 +308,129 @@ void loop()
 										colVel = 1;
 										colState = 0;
 								}
-						}
-
-						
-
-
-
-
+						}//end else
 
 						// Write out colors
 						ledStrip.write(colorST, LED_COUNT);
-						////handleNextPatternButton();
+						{
+								////handleNextPatternButton();
 
-						//if (loopCount == 0)
-						//{
-						//		// whenever timer resets, clear the LED colors array (all off)
-						//		for (int i = 0; i < LED_COUNT; i++)
-						//		{
-						//				colors[i] = rgb_color{ 0, 0, 0 };
-						//		}
-						//}
+								//if (loopCount == 0)
+								//{
+								//		// whenever timer resets, clear the LED colors array (all off)
+								//		for (int i = 0; i < LED_COUNT; i++)
+								//		{
+								//				colors[i] = rgb_color{ 0, 0, 0 };
+								//		}
+								//}
 
-						//if (pattern == WarmWhiteShimmer || pattern == RandomColorWalk)
-						//{
-						//		// for these two patterns, we want to make sure we get the same
-						//		// random sequence six times in a row (this provides smoother
-						//		// random fluctuations in brightness/color)
-						//		if (loopCount % 6 == 0)
-						//		{
-						//				seed = random(30000);
-						//		}
-						//		randomSeed(seed);
-						//}
+								//if (pattern == WarmWhiteShimmer || pattern == RandomColorWalk)
+								//{
+								//		// for these two patterns, we want to make sure we get the same
+								//		// random sequence six times in a row (this provides smoother
+								//		// random fluctuations in brightness/color)
+								//		if (loopCount % 6 == 0)
+								//		{
+								//				seed = random(30000);
+								//		}
+								//		randomSeed(seed);
+								//}
 
-						//// call the appropriate pattern routine based on state; these
-						//// routines just set the colors in the colors array
-						//switch (pattern)
-						//{
-						//case WarmWhiteShimmer:
-						//		// warm white shimmer for 300 loopCounts, fading over last 70
-						//		maxLoops = 300;
-						//		warmWhiteShimmer(loopCount > maxLoops - 70);
-						//		break;
+								//// call the appropriate pattern routine based on state; these
+								//// routines just set the colors in the colors array
+								//switch (pattern)
+								//{
+								//case WarmWhiteShimmer:
+								//		// warm white shimmer for 300 loopCounts, fading over last 70
+								//		maxLoops = 300;
+								//		warmWhiteShimmer(loopCount > maxLoops - 70);
+								//		break;
 
-						//case RandomColorWalk:
-						//		// start with alternating red and green colors that randomly walk
-						//		// to other colors for 400 loopCounts, fading over last 80
-						//		maxLoops = 400;
-						//		randomColorWalk(loopCount == 0 ? 1 : 0, loopCount > maxLoops - 80);
-						//		break;
+								//case RandomColorWalk:
+								//		// start with alternating red and green colors that randomly walk
+								//		// to other colors for 400 loopCounts, fading over last 80
+								//		maxLoops = 400;
+								//		randomColorWalk(loopCount == 0 ? 1 : 0, loopCount > maxLoops - 80);
+								//		break;
 
-						//case TraditionalColors:
-						//		// repeating pattern of red, green, orange, blue, magenta that
-						//		// slowly moves for 400 loopCounts
-						//		maxLoops = 400;
-						//		traditionalColors();
-						//		break;
+								//case TraditionalColors:
+								//		// repeating pattern of red, green, orange, blue, magenta that
+								//		// slowly moves for 400 loopCounts
+								//		maxLoops = 400;
+								//		traditionalColors();
+								//		break;
 
-						//case ColorExplosion:
-						//		// bursts of random color that radiate outwards from random points
-						//		// for 630 loop counts; no burst generation for the last 70 counts
-						//		// of every 200 count cycle or over the over final 100 counts
-						//		// (this creates a repeating bloom/decay effect)
-						//		maxLoops = 630;
-						//		colorExplosion((loopCount % 200 > 130) || (loopCount > maxLoops - 100));
-						//		break;
+								//case ColorExplosion:
+								//		// bursts of random color that radiate outwards from random points
+								//		// for 630 loop counts; no burst generation for the last 70 counts
+								//		// of every 200 count cycle or over the over final 100 counts
+								//		// (this creates a repeating bloom/decay effect)
+								//		maxLoops = 630;
+								//		colorExplosion((loopCount % 200 > 130) || (loopCount > maxLoops - 100));
+								//		break;
 
-						//case Gradient:
-						//		// red -> white -> green -> white -> red ... gradiant that scrolls
-						//		// across the strips for 250 counts; this pattern is overlaid with
-						//		// waves of dimness that also scroll (at twice the speed)
-						//		maxLoops = 250;
-						//		gradient();
-						//		delay(6);  // add an extra 6ms delay to slow things down
-						//		break;
+								//case Gradient:
+								//		// red -> white -> green -> white -> red ... gradiant that scrolls
+								//		// across the strips for 250 counts; this pattern is overlaid with
+								//		// waves of dimness that also scroll (at twice the speed)
+								//		maxLoops = 250;
+								//		gradient();
+								//		delay(6);  // add an extra 6ms delay to slow things down
+								//		break;
 
-						//case BrightTwinkle:
-						//		// random LEDs light up brightly and fade away; it is a very similar
-						//		// algorithm to colorExplosion (just no radiating outward from the
-						//		// LEDs that light up); as time goes on, allow progressively more
-						//		// colors, halting generation of new twinkles for last 100 counts.
-						//		maxLoops = 1200;
-						//		if (loopCount < 400)
-						//		{
-						//				brightTwinkle(0, 1, 0);  // only white for first 400 loopCounts
-						//		}
-						//		else if (loopCount < 650)
-						//		{
-						//				brightTwinkle(0, 2, 0);  // white and red for next 250 counts
-						//		}
-						//		else if (loopCount < 900)
-						//		{
-						//				brightTwinkle(1, 2, 0);  // red, and green for next 250 counts
-						//		}
-						//		else
-						//		{
-						//				// red, green, blue, cyan, magenta, yellow for the rest of the time
-						//				brightTwinkle(1, 6, loopCount > maxLoops - 100);
-						//		}
-						//		break;
+								//case BrightTwinkle:
+								//		// random LEDs light up brightly and fade away; it is a very similar
+								//		// algorithm to colorExplosion (just no radiating outward from the
+								//		// LEDs that light up); as time goes on, allow progressively more
+								//		// colors, halting generation of new twinkles for last 100 counts.
+								//		maxLoops = 1200;
+								//		if (loopCount < 400)
+								//		{
+								//				brightTwinkle(0, 1, 0);  // only white for first 400 loopCounts
+								//		}
+								//		else if (loopCount < 650)
+								//		{
+								//				brightTwinkle(0, 2, 0);  // white and red for next 250 counts
+								//		}
+								//		else if (loopCount < 900)
+								//		{
+								//				brightTwinkle(1, 2, 0);  // red, and green for next 250 counts
+								//		}
+								//		else
+								//		{
+								//				// red, green, blue, cyan, magenta, yellow for the rest of the time
+								//				brightTwinkle(1, 6, loopCount > maxLoops - 100);
+								//		}
+								//		break;
 
-						//case Collision:
-						//		// colors grow towards each other from the two ends of the strips,
-						//		// accelerating until they collide and the whole strip flashes
-						//		// white and fades; this repeats until the function indicates it
-						//		// is done by returning 1, at which point we stop keeping maxLoops
-						//		// just ahead of loopCount
-						//		if (!collision())
-						//		{
-						//				maxLoops = loopCount + 2;
-						//		}
-						//		break;
-						//}
+								//case Collision:
+								//		// colors grow towards each other from the two ends of the strips,
+								//		// accelerating until they collide and the whole strip flashes
+								//		// white and fades; this repeats until the function indicates it
+								//		// is done by returning 1, at which point we stop keeping maxLoops
+								//		// just ahead of loopCount
+								//		if (!collision())
+								//		{
+								//				maxLoops = loopCount + 2;
+								//		}
+								//		break;
+								//}
 
-						//// update the LED strips with the colors in the colors array
-						//ledStrip.write(colors, LED_COUNT);
-						//loopCount++;  // increment our loop counter/timer.
+								//// update the LED strips with the colors in the colors array
+								//ledStrip.write(colors, LED_COUNT);
+								//loopCount++;  // increment our loop counter/timer.
 
-						//if (loopCount >= maxLoops && digitalRead(AUTOCYCLE_SWITCH_PIN))
-						//{
-						//		// if the time is up for the current pattern and the optional hold
-						//		// switch is not grounding the AUTOCYCLE_SWITCH_PIN, clear the
-						//		// loop counter and advance to the next pattern in the cycle
-						//		loopCount = 0;  // reset timer
-						//		pattern = ((unsigned char)(pattern + 1)) % NUM_STATES;  // advance to next pattern
-						//}
+								//if (loopCount >= maxLoops && digitalRead(AUTOCYCLE_SWITCH_PIN))
+								//{
+								//		// if the time is up for the current pattern and the optional hold
+								//		// switch is not grounding the AUTOCYCLE_SWITCH_PIN, clear the
+								//		// loop counter and advance to the next pattern in the cycle
+								//		loopCount = 0;  // reset timer
+								//		pattern = ((unsigned char)(pattern + 1)) % NUM_STATES;  // advance to next pattern
+								//}
+						}
 				}
-		}
+		}//end if (keyOn() == 1)
 		// Not Shaq Ready or Shaq Time
 		else {
 				shaqTime = 0;
