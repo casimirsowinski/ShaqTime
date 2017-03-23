@@ -106,6 +106,8 @@ enum Pattern {
 unsigned char pattern = AllOff;
 unsigned int maxLoops;  // go to next state when loopCount >= maxLoops
 
+rgb_color *halfPower(rgb_color input);
+
 // initialization stuff
 void setup()
 {
@@ -205,8 +207,8 @@ void loop()
 						//		colors[i] = rgb_color{ 100, 0, 0 };
 						//}
 						
-						// Write out colors
-						ledStrip.write(colors, LED_COUNT);		
+						// Write out colors					
+						ledStrip.write(colors, LED_COUNT);
 				} 
 				// Run Shaq Time
 				if (shaqTime == 1) {
@@ -543,6 +545,16 @@ void shaqShimmer(unsigned char dimOnly)
 						colors[i + 1] = rgb_color{ colors[i].red >> 2, colors[i].green >> 2, colors[i].blue >> 2 };
 				}
 		}
+}
+
+//Need to go through all reb structs, int divide them by 2, and output pointer to array
+rgb_color halfPower(rgb_color *input) {
+
+
+
+
+		//rgb_color output = rgb_color{ input.red / 2, input.green / 2, input.blue / 2 };
+		//return output;
 }
 
 
