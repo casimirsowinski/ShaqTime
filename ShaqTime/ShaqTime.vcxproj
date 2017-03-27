@@ -77,6 +77,9 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Main.ino">
+      <FileType>CppCode</FileType>
+    </None>
     <None Include="replacing rgb_color struct init.ino" />
     <None Include="ShaqTime.ino">
       <FileType>CppCode</FileType>
@@ -92,7 +95,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties arduino.upload.port="COM3" />
+      <UserProperties arduino.upload.port="COM6" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

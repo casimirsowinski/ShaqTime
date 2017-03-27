@@ -19,6 +19,7 @@
     <None Include="Working_Button_And_ST_Seq.ino" />
     <None Include="replacing rgb_color struct init.ino" />
     <None Include="test.ino" />
+    <None Include="Main.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.ShaqTime.vsarduino.h">

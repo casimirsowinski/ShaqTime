@@ -32,10 +32,10 @@
 #include <EEPROM.h>
 
  // Create an ledStrip object on pin 12.
-#define LED_SIGNAL_PIN 12
+#define LED_SIGNAL_PIN 10
 PololuLedStrip<LED_SIGNAL_PIN> ledStrip;
 
-#define NEXT_PATTERN_BUTTON_PIN  4  // button between this pin and ground
+#define NEXT_PATTERN_BUTTON_PIN  6  // button between this pin and ground
 #define AUTOCYCLE_SWITCH_PIN  5  // switch between this pin and ground
 
 // Create a buffer for holding 509 colors.
@@ -55,9 +55,9 @@ unsigned int seed = 0;  // used to initialize random number generator
 bool g_ShaqReadyInit = true;
 unsigned int g_SRSeed = 0;
 
-const int KEYPIN = 3;     // the number of the pushbutton pin
-const int BUTTONPIN = 2;     // the number of the pushbutton pin
-const int LEDPIN = 12;      // the number of the LED pin
+const int KEYPIN = 9;     // the number of the pushbutton pin
+const int BUTTONPIN = 8;     // the number of the pushbutton pin
+const int LEDPIN = 10;      // the number of the LED pin
 
 //bool keyState = true;         // variable for reading the pushbutton status
 bool buttonState;         // variable for reading the pushbutton status
@@ -85,7 +85,7 @@ unsigned int overCurrentTic = 0;
 unsigned int colIdx = 0;
 float colVel = 1.0;
 float colAcc = 0.11;
-unsigned int colState = 2;
+unsigned int colState = 0;
 float theta_col = 0;
 float delta_theta_col = 5;
 
@@ -106,7 +106,7 @@ enum Pattern {
 unsigned char pattern = AllOff;
 unsigned int maxLoops;  // go to next state when loopCount >= maxLoops
 
-rgb_color *halfPower(rgb_color input);
+//rgb_color *halfPower(rgb_color input);
 
 // initialization stuff
 void setup()
@@ -212,25 +212,6 @@ void loop()
 				} 
 				// Run Shaq Time
 				if (shaqTime == 1) {
-						//for (int i = 0; i < LED_COUNT; i++) {
-						//		colors[i] = rgb_color{ 0, 100, 0 };
-						//}
-
-						///*Collision*/
-						//int skip = 1;
-						//for (size_t i = 0; i < LED_COUNT; i = i + skip) {
-						//		/*Scale LED_COUNT to 256*/
-						//		int r = i * 0.85;
-						//		colorST[i] = rgb_color{ r, r, 20 };
-						//		int skipNum = skip - 1;
-						//		while (skipNum > 1) {
-						//				colorST[i - skipNum] = rgb_color{ r, r, 20 };
-						//		}
-						//		/*Randomly accerate trail*/
-						//		if (!random(5)) {
-						//				//skip++;
-						//		}
-						//}
 						if (colState == 0) {
 								/*Store last updated LED*/
 								unsigned int lastIdx = colIdx;
@@ -256,7 +237,7 @@ void loop()
 										colState = 1;
 								}
 						}//end if (colState == 0) 
-						if (colState == 2) {
+						else if (colState == 2) {
 
 								for (size_t i = 0; i < LED_COUNT; i++) {
 										
@@ -286,6 +267,27 @@ void loop()
 
 								}
 						}//end if (colState == 2)
+						else if (colState == 1) {
+								for (int i = 0; i < LED_COUNT; i++) {
+										colors[i] = rgb_color{ 0, 100, 0 };
+								}
+
+								/*Collision*/
+								int skip = 1;
+								for (size_t i = 0; i < LED_COUNT; i = i + skip) {
+										/*Scale LED_COUNT to 256*/
+										int r = i * 0.85;
+										colorST[i] = rgb_color{ r, r, 20 };
+										int skipNum = skip - 1;
+										while (skipNum > 1) {
+												colorST[i - skipNum] = rgb_color{ r, r, 20 };
+										}
+										/*Randomly accerate trail*/
+										if (!random(5)) {
+												//skip++;
+										}
+								}
+						}
 						else {
 								/*Store last updated LED*/
 								unsigned int lastIdx = colIdx;
@@ -497,7 +499,7 @@ void debounceButton()
 				{
 						// wait for button to be released
 						while (digitalRead(BUTTONPIN) == 0);
-						delay(10);  // debounce the button
+								delay(10);  // debounce the button
 				}
 				shaqTime = !shaqTime;
 		}

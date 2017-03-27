@@ -66,6 +66,7 @@ typedef void *__builtin_va_list;
 #undef PSTR
 #define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
 #include "ShaqTime.ino"
+#include "Main.ino"
 #include "Working_Button_And_ST_Seq.ino"
 #include "replacing rgb_color struct init.ino"
 #include "test.ino"
