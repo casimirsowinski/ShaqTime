@@ -7,7 +7,7 @@ Casimir Sowinski
 #include <PololuLedStrip.h>
 //#include <EEPROM.h>
 
-#define LED_COUNT		599
+#define LED_COUNT		600
 #define LED_PIN			10
 #define BUT_PIN			8
 #define KEY_PIN			9
@@ -31,13 +31,20 @@ const int idlePulseDuration = 20;
 int activePulseTimer = 0;
 int idlePulseTimer = 0;
 /*Holds color information for active, idle, and pulses*/
-rgb_color colorReady[LED_COUNT] = { 0, 0, 0 };
-rgb_color colorActivePulse[LED_COUNT] = { 0, 0, 0 };
-rgb_color colorIdle[LED_COUNT] = { 0, 0, 0 };
-rgb_color colorIdlePulse[LED_COUNT] = { 0, 0, 0 };
+rgb_color color[LED_COUNT] = { 0, 0, 0 };
+//rgb_color colorReady[LED_COUNT] = { 0, 0, 0 };
+//rgb_color colorActivePulse[LED_COUNT] = { 0, 0, 0 };
+//rgb_color colorIdle[LED_COUNT] = { 0, 0, 0 };
+//rgb_color colorIdlePulse[LED_COUNT] = { 0, 0, 0 };
 
 //bool g_primaryState = 0;
 //bool g_secondaryState = 0;
+
+float theta_r, theta_g, theta_b;
+float delta_theta_r = 0.03;
+float delta_theta_g = 0.11;
+float delta_theta_b = 0.07;
+float const MAX_THETA = 6.2831;
 
 /*Function prototypes*/
 void advanceReady();
@@ -46,6 +53,7 @@ void advanceActivePulse();
 void advanceIdle();
 void advanceIdlePulse();
 bool debounce(int pin);
+bool debounce2(int pin);
 
 void setup() {								
 		Serial.begin(115200);
@@ -67,12 +75,12 @@ void setup() {
 void loop() {
 		/*Check key state, switch to correct mode*/
 		if (currentState == idle) {
-				if (debounce(KEY_PIN)) {
+				if (debounce2(KEY_PIN)) {
 						currentState = ready;
 				}
 		}
 		else {
-				if (!debounce(KEY_PIN)) {
+				if (!debounce2(KEY_PIN)) {
 						currentState = idle;
 				}
 		}
@@ -81,21 +89,21 @@ void loop() {
 		if (currentState == ready) {
 				advanceReady();
 				/*Check for button press, transition to active*/
-				if (debounce(BUT_PIN)) {
+				if (debounce2(BUT_PIN)) {
 						currentState = active;
 				}
 		}
 		else if (currentState == active) {
 				advanceActive();
 				/*Check for button press, start active pulse*/
-				if (debounce(BUT_PIN)) {
+				if (debounce2(BUT_PIN)) {
 						activePulseTimer = activePulseDuration;
 				}
 		}
 		else if (currentState == idle) {
 				advanceIdle();
 				/*Check for button press, start idle pulse*/
-				if (debounce(BUT_PIN)) {
+				if (debounce2(BUT_PIN)) {
 						idlePulseTimer = idlePulseDuration;
 				}
 		}
@@ -121,6 +129,10 @@ bool debounce(int pin) {
 		}
 }
 
+bool debounce2(int pin) {
+		return !digitalRead(pin);
+}
+
 void advanceReady() {
 		/*Pick random LED not near edges*/
 		const int SPREAD_MAX = 10;
@@ -129,45 +141,73 @@ void advanceReady() {
 		unsigned char r = random(20);
 		unsigned char g = r;
 		unsigned char b = random(255);
-		colorReady[center] = rgb_color{ r, g, b };
+		color[center] = rgb_color{ r, g, b };
 		while (spread > 0) {
-				colorReady[center - spread] = colorReady[center];
-				colorReady[center + spread] = colorReady[center];
+				color[center - spread] = color[center];
+				color[center + spread] = color[center];
 				spread--;
 		}
 		float mult = .2;
 		// Propagate colors in both directions
 		for (int i = 1; i < LED_COUNT; i++) {
-				colorReady[i].red = mult * (colorReady[i].red + colorReady[i - 1].red + colorReady[i + 1].red);
-				colorReady[i].green = 0.8 * mult * (colorReady[i].red + colorReady[i - 1].green + colorReady[i + 1].green);
-				colorReady[i].blue = 0.5 * mult * (colorReady[i].green + colorReady[i - 1].blue + colorReady[i + 1].blue);
+				color[i].red = mult * (color[i].red + color[i - 1].red + color[i + 1].red);
+				color[i].green = 0.8 * mult * (color[i].red + color[i - 1].green + color[i + 1].green);
+				color[i].blue = 0.5 * mult * (color[i].green + color[i - 1].blue + color[i + 1].blue);
 		}
 
-		ledStrip.write(colorReady, LED_COUNT);
+		ledStrip.write(color, LED_COUNT);
 }
 
 void advanceActive() {
-		/*Pick random LED not near edges*/
-		const int SPREAD_MAX = 10;
-		int spread = random(SPREAD_MAX);
-		int center = random(LED_COUNT - 2 * SPREAD_MAX) + SPREAD_MAX;
-		unsigned char r = random(20);
-		unsigned char g = random(255);
-		unsigned char b = r;
-		colorReady[center] = rgb_color{ r, g, b };
-		while (spread > 0) {
-				colorReady[center - spread] = colorReady[center];
-				colorReady[center + spread] = colorReady[center];
-				spread--;
+		unsigned int rMax = random(255);
+		unsigned int gMax = random(1);
+		unsigned int bMax = random(1);
+		//color[LED_COUNT / 2 - 1] = rgb_color{ random(rMax), random(gMax), random(bMax) };
+		//color[LED_COUNT / 2] = rgb_color{ random(rMax), random(gMax), random(bMax) };
+		//color[LED_COUNT / 2 - 1] = rgb_color{ rMax, gMax, bMax };
+		//color[LED_COUNT / 2] = rgb_color{ rMax, gMax, bMax };
+		int omega = 2;
+		/*downstream (right)*/
+		color[LED_COUNT / 2] = rgb_color{ 120 + 120 * sin(theta_r), gMax, 120 + 120 * sin(theta_b + 0.2) };
+		/*closest to arduino (left)*/
+		color[LED_COUNT / 2 - 1] = rgb_color{ 0 + 64 * sin(theta_r), gMax, 0 + 64 * sin(theta_b) };
+
+		//color[LED_COUNT / 2 - 1] = rgb_color{ rMax, gMax, bMax };
+		//gummy worm
+		//color[LED_COUNT / 2] = rgb_color{128 + 128 * sin(theta_r), 128 + 128 * sin(theta_g),  bMax};
+		//robocop
+		//color[LED_COUNT / 2] = rgb_color{128 + 128 * sin(theta_r), gMax, 128 + 128 * sin(theta_b)};
+
+		theta_r = theta_r + delta_theta_r;
+		theta_g = theta_g + delta_theta_g;
+		theta_b = theta_b + delta_theta_b;
+
+		//iv effect
+		if (theta_r > MAX_THETA) {
+				theta_r = 0;
 		}
-		float mult = .3;
-		// Propagate colors in both directions
-		for (int i = 1; i < LED_COUNT; i++) {
-				colorReady[i].red = mult * (colorReady[i].red + colorReady[i - 1].red + colorReady[i + 1].red);
-				colorReady[i].green = 0.8 * mult * (colorReady[i].red + colorReady[i - 1].green + colorReady[i + 1].green);
-				colorReady[i].blue = 0.5 * mult * (colorReady[i].green + colorReady[i - 1].blue + colorReady[i + 1].blue);
+		if (theta_g > MAX_THETA) {
+				theta_g = 0;
 		}
-		ledStrip.write(colorReady, LED_COUNT);
+		if (theta_b > MAX_THETA) {
+				theta_b = 0;
+		}
+
+		// Propagate color from the center outwards
+		for (int i = 1; i < LED_COUNT / 2 - 1; i++) {
+				color[i] = color[i + 1];
+		}
+		for (int i = LED_COUNT; i > LED_COUNT / 2; i--) {
+				color[i] = color[i - 1];
+		}
+
+
+		//for (int i = 0; i < LED_COUNT; i++) {
+		//		color[i] = rgb_color{ 100, 0, 0 };
+		//}
+
+		// Write out color					
+		ledStrip.write(color, LED_COUNT);
 }
 
 void advanceActivePulse() {
@@ -182,32 +222,32 @@ void advanceIdle() {
 		unsigned char r = random(100);
 		unsigned char g = random(100);
 		unsigned char b = random(100);
-		colorIdle[center] = rgb_color{ r, g, b };
+		color[center] = rgb_color{ r, g, b };
 		while (spread > 0) {
-				colorIdle[center - spread] = colorIdle[center];
-				colorIdle[center + spread] = colorIdle[center];
+				color[center - spread] = color[center];
+				color[center + spread] = color[center];
 				spread--;
 		}
 		float mult = .3;
 		// Propagate colors in both directions
 		for (int i = 1; i < LED_COUNT; i++) {
-				colorIdle[i].red = mult * (colorIdle[i].red + colorIdle[i - 1].red + colorIdle[i + 1].red) + idlePulseTimer / 2;
-				colorIdle[i].green = 0.8 * mult * (colorIdle[i].red + colorIdle[i - 1].green + colorIdle[i + 1].green);
-				colorIdle[i].blue = 0.5 * mult * (colorIdle[i].green + colorIdle[i - 1].blue + colorIdle[i + 1].blue);
+				color[i].red = mult * (color[i].red + color[i - 1].red + color[i + 1].red) + idlePulseTimer / 2;
+				color[i].green = 0.8 * mult * (color[i].red + color[i - 1].green + color[i + 1].green);
+				color[i].blue = 0.5 * mult * (color[i].green + color[i - 1].blue + color[i + 1].blue);
 
 				/*Check bounds*/
-				if (colorIdle[i].red > 255)
-						colorIdle[i].red = 255;
-				if (colorIdle[i].green > 255)
-						colorIdle[i].green = 255;
-				if (colorIdle[i].blue > 255)
-						colorIdle[i].blue = 255;
-				if (colorIdle[i].red < 0)
-						colorIdle[i].red = 0;
-				if (colorIdle[i].green < 0)
-						colorIdle[i].green = 0;
-				if (colorIdle[i].blue < 0)
-						colorIdle[i].blue = 0;
+				if (color[i].red > 255)
+						color[i].red = 255;
+				if (color[i].green > 255)
+						color[i].green = 255;
+				if (color[i].blue > 255)
+						color[i].blue = 255;
+				if (color[i].red < 0)
+						color[i].red = 0;
+				if (color[i].green < 0)
+						color[i].green = 0;
+				if (color[i].blue < 0)
+						color[i].blue = 0;
 		}
 
 		if (idlePulseTimer > 0) {
@@ -215,14 +255,14 @@ void advanceIdle() {
 				if (idlePulseTimer == idlePulseDuration) {
 						//for (int i = 1; i < LED_COUNT; i++) {
 						//		/*Reset pulse colors*/
-						//		colorIdlePulse[i] = { 0, 0, 0 };
+						//		colorPulse[i] = { 0, 0, 0 };
 						//}
 				}				
 				idlePulseTimer--;
 		}
 
 
-		ledStrip.write(colorIdle, LED_COUNT);
+		ledStrip.write(color, LED_COUNT);
 }
 
 void advanceIdlePulse() {
