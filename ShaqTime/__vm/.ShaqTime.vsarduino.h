@@ -70,4 +70,5 @@ typedef void *__builtin_va_list;
 #include "Working_Button_And_ST_Seq.ino"
 #include "replacing rgb_color struct init.ino"
 #include "test.ino"
+#include "test2.ino"
 #endif

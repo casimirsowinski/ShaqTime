@@ -20,6 +20,8 @@
     <None Include="replacing rgb_color struct init.ino" />
     <None Include="test.ino" />
     <None Include="Main.ino" />
+    <None Include="test2.ino" />
+    <None Include="colorConversion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.ShaqTime.vsarduino.h">

@@ -77,6 +77,9 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="colorConversion.h">
+      <FileType>CppCode</FileType>
+    </None>
     <None Include="Main.ino">
       <FileType>CppCode</FileType>
     </None>
@@ -85,6 +88,9 @@
       <FileType>CppCode</FileType>
     </None>
     <None Include="test.ino" />
+    <None Include="test2.ino">
+      <FileType>CppCode</FileType>
+    </None>
     <None Include="Working_Button_And_ST_Seq.ino" />
   </ItemGroup>
   <ItemGroup>
@@ -95,7 +101,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties arduino.upload.port="COM6" />
+      <UserProperties vm.programmer_name="avrisp" arduino.upload.port="COM6" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
